@@ -10,9 +10,9 @@ var database = admin.database();
 const app = express();
 app.use(cors({ origin: true }));
 
-app.get("/init", async (req, res) => {
+const initRTDB = async () => {
   var updates = {};
-  (updates["/Soccer/"] = {
+  updates["/Soccer/"] = {
     "Premier League": {
       "Manchester vs Chelsea": {
         ID: 1000,
@@ -26,24 +26,50 @@ app.get("/init", async (req, res) => {
         ID: 3000,
       },
     },
-  }),
-    (updates["/Odds/"] = {
-      1000: {
-        odds1: 3.4,
-        odds2: 4.5,
+  };
+  updates["/Basket/"] = {
+    "League 1": {
+      "TeamA vs TeamB": {
+        ID: 4000,
       },
-      2000: {
-        odds1: 1.1,
-        odds2: 2.7,
+    },
+    "League 2": {
+      "TeamC vs TeamD": {
+        ID: 5000,
       },
-      3000: {
-        odds1: 3.6,
-        odds2: 4.1,
+      "TeamE vs TeamF": {
+        ID: 6000,
       },
-    }),
-    await database.ref().update(updates);
-  res.send("added data");
-});
+    },
+  };
+  updates["/Odds/"] = {
+    1000: {
+      odds1: 3.4,
+      odds2: 4.5,
+    },
+    2000: {
+      odds1: 1.1,
+      odds2: 2.7,
+    },
+    3000: {
+      odds1: 3.6,
+      odds2: 4.1,
+    },
+    4000: {
+      odds1: 2.4,
+      odds2: 4.5,
+    },
+    5000: {
+      odds1: 2.1,
+      odds2: 0.7,
+    },
+    6000: {
+      odds1: 1.6,
+      odds2: 3.9,
+    },
+  };
+  await database.ref().update(updates);
+};
 
 app.get("/", async (req, res) => {
   const eventID = req.query.eventID;
@@ -58,9 +84,6 @@ app.get("/", async (req, res) => {
       break;
     case "basket":
       sportRef = database.ref("Basket");
-      break;
-    case "tennis":
-      sportRef = database.ref("Tennis");
       break;
     default:
       res.status(400).send("must receive a sport in parameter");
@@ -99,5 +122,7 @@ app.get("/", async (req, res) => {
   }
   res.status(200).send(data);
 });
+
+initRTDB();
 
 exports.api_express = functions.https.onRequest(app);
