@@ -47,7 +47,6 @@ app.get("/init", async (req, res) => {
 
 app.get("/", async (req, res) => {
   const eventID = req.query.eventID;
-  console.log(eventID);
   let sportData,
     oddsData = {};
   let sportRef = null;
@@ -71,31 +70,34 @@ app.get("/", async (req, res) => {
     sportData = snapshot.val();
   });
 
-  eventID
-    ? res.send(
-        (data[eventID] = {
-          Odds: await database
-            .ref(`Odds/${eventID}`)
-            .once("value", (snapshot) => {
-              oddsData = snapshot.val();
-            }),
-        })
-      )
-    : await database.ref("Odds").once("value", (snapshot) => {
-        oddsData = snapshot.val();
-      });
-
-  Object.keys(sportData).forEach((league) => {
-    console.log("league", league);
-    Object.keys(sportData[league]).forEach((match) => {
-      console.log("     match", match);
-      Object.entries(sportData[league][match]).forEach((entry) => {
-        console.log("       entry", entry);
-        data[entry[1]] = { Odds: oddsData[entry[1]] };
+  if (eventID) {
+    await database.ref(`Odds/${eventID}`).once("value", (snapshot) => {
+      oddsData = snapshot.val();
+      if (!oddsData) {
+        res
+          .status(400)
+          .send(`No event is coresponding to this ID : ${eventID}`);
+      }
+      data[eventID] = {
+        Odds: oddsData,
+      };
+    });
+  } else {
+    await database.ref("Odds").once("value", (snapshot) => {
+      oddsData = snapshot.val();
+    });
+    Object.keys(sportData).forEach((league) => {
+      // console.log("league : ", league);
+      Object.keys(sportData[league]).forEach((match) => {
+        // console.log("     match : ", match);
+        Object.entries(sportData[league][match]).forEach((entry) => {
+          // console.log("       entry : ", entry);
+          data[entry[1]] = { Odds: oddsData[entry[1]] };
+        });
       });
     });
-  });
-  res.send(data);
+  }
+  res.status(200).send(data);
 });
 
 exports.api_express = functions.https.onRequest(app);
