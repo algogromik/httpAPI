@@ -1,6 +1,6 @@
 # Launching
 
-### Kill ports (in case of previous error in the emulator) and then simple run emulator
+## Kill ports (in case of previous error in the emulator) and then simple run emulator
 
 If the emulator has stopped due to an error you have to kill all used ports
 
@@ -8,9 +8,9 @@ If the emulator has stopped due to an error you have to kill all used ports
 $ kill-port --port 8000,9099,5001,8080,9000,5000,8085,9199,4000,4400,4500 && firebase emulators:start
 ```
 
-### Backup import/export data in emulator
+## Backup import/export data in emulator
 
-## Import data in emulator
+### Import data in emulator
 
 Add production data in the backup file at:
 
@@ -22,7 +22,7 @@ Then start with importing it:
 $ kill-port --port 8000,9099,5001,8080,9000,5000,8085,9199,4000,4400,4500 && firebase emulators:start --import=./emulators.backup
 ```
 
-## Export data from emulator
+### Export data from emulator
 
 If you want to updates the data with the last changes from the emulator, you have to open a new terminal and run the next command before stoping it:
 
@@ -32,7 +32,7 @@ $ firebase emulators:export ./emulators.backup
 
 Then, you will be able to overwrite past backup
 
-### Tunneling Network
+## Tunneling Network
 
 ### with ngrok
 
@@ -69,7 +69,7 @@ example: https://cloud-functions.loca.lt/functions-api-162ea/us-central1/api_exp
 
 # Testing scripts:
 
-## Get odds for a sport
+### Get odds for a sport
 
 {base_URL}/functions-api-162ea/us-central1/api_express/?sport=soccer
 
