@@ -10,67 +10,7 @@ var database = admin.database();
 const app = express();
 app.use(cors({ origin: true }));
 
-// const initRTDB = async () => {
-//   var updates = {};
-//   updates["/Soccer/"] = {
-//     "Premier League": {
-//       "Manchester vs Chelsea": {
-//         ID: 1000,
-//       },
-//     },
-//     "Second League": {
-//       "Barcelone vs Real Madrid": {
-//         ID: 2000,
-//       },
-//       "PSG vs Marseille": {
-//         ID: 3000,
-//       },
-//     },
-//   };
-//   updates["/Basket/"] = {
-//     "League 1": {
-//       "TeamA vs TeamB": {
-//         ID: 4000,
-//       },
-//     },
-//     "League 2": {
-//       "TeamC vs TeamD": {
-//         ID: 5000,
-//       },
-//       "TeamE vs TeamF": {
-//         ID: 6000,
-//       },
-//     },
-//   };
-//   updates["/Odds/"] = {
-//     1000: {
-//       odds1: 3.4,
-//       odds2: 4.5,
-//     },
-//     2000: {
-//       odds1: 1.1,
-//       odds2: 2.7,
-//     },
-//     3000: {
-//       odds1: 3.6,
-//       odds2: 4.1,
-//     },
-//     4000: {
-//       odds1: 2.4,
-//       odds2: 4.5,
-//     },
-//     5000: {
-//       odds1: 2.1,
-//       odds2: 0.7,
-//     },
-//     6000: {
-//       odds1: 1.6,
-//       odds2: 3.9,
-//     },
-//   };
-//   await database.ref().update(updates);
-// };
-
+// URL: ../functions-api-162ea/us-central1/api_express/?sport=soccer
 app.get("/", async (req, res) => {
   const eventID = req.query.eventID;
   let sportData,
@@ -111,9 +51,9 @@ app.get("/", async (req, res) => {
     });
     Object.keys(sportData).forEach((league) => {
       // console.log("league : ", league);
-      Object.keys(sportData[league]).forEach((match) => {
-        // console.log("     match : ", match);
-        Object.entries(sportData[league][match]).forEach((entry) => {
+      Object.keys(sportData[league]).forEach((game) => {
+        // console.log("     game : ", game);
+        Object.entries(sportData[league][game]).forEach((entry) => {
           // console.log("       entry : ", entry);
           data[entry[1]] = { Odds: oddsData[entry[1]] };
         });
@@ -123,6 +63,38 @@ app.get("/", async (req, res) => {
   res.status(200).send(data);
 });
 
-// initRTDB();
+app.get("/test2/", async (req, res) => {
+  let path = ["mappings/soccer/pinnacle"]; //to modify
+  let ref = database.ref(path[0]);
+  console.log(2);
+  res.send({ a: 3 });
+});
+
+// URL: ../functions-api-162ea/us-central1/api_express/?token=#####
+app.get("/test1/", async (req, res) => {
+  let path = ["mappings/soccer/pinnacle"]; //to modify
+  let response = [["*", "*", "cutoffAt"]]; //to modify
+  let responseFilter = [["IDcounter"], ["*", "*", "id"]]; //to modify
+
+  let ref = database.ref(path[0]);
+  let data = {};
+
+  await ref.once("value", (snapshot) => {
+    data = snapshot.val();
+  });
+
+  const { IDcounter, ...rest } = data;
+  data = rest;
+
+  Object.keys(data).forEach((league) => {
+    Object.keys(data[league]).forEach((game) => {
+      //delete data[league][game].id;
+      const { id, ...rest } = data[league][game];
+      data[league][game] = rest;
+    });
+  });
+
+  res.status(200).send(data);
+});
 
 exports.api_express = functions.https.onRequest(app);
