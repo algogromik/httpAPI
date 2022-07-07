@@ -76,3 +76,7 @@ example: https://cloud-functions.loca.lt/functions-api-162ea/us-central1/api_exp
 ### Get an event's odds
 
 {base_URL}/functions-api-162ea/us-central1/api_express/?sport=soccer&eventID=1000
+
+### Get a data with several filters
+
+{base_URL}/functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]

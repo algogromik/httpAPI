@@ -63,7 +63,7 @@ app.get("/", async (req, res) => {
   res.status(200).send(data);
 });
 
-//  URL: ../functions-api-162ea/us-central1/api_express/test2/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]
+//  URL: ../functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]
 //token=#####
 
 app.get("/test1/", async (req, res) => {
