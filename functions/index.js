@@ -63,16 +63,12 @@ app.get("/", async (req, res) => {
   res.status(200).send(data);
 });
 
-app.get("/test2/", async (req, res) => {
-  console.log(1);
-});
+//  URL: ../functions-api-162ea/us-central1/api_express/test2/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]
+//token=#####
 
-// URL: ../functions-api-162ea/us-central1/api_express/?token=#####
 app.get("/test1/", async (req, res) => {
-  let path = ["mappings/soccer/pinnacle/"];
-  let response = [["*", "*", "cutoffAt"]]; //no need
-  let filters = [["IDcounter"], ["*", "*", "id"]];
-
+  let path = JSON.parse(req.query.path);
+  let filters = JSON.parse(req.query.filters);
   try {
     let ref = database.ref(path[0]);
     let data = {};
