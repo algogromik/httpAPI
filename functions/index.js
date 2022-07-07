@@ -64,37 +64,51 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/test2/", async (req, res) => {
-  let path = ["mappings/soccer/pinnacle"]; //to modify
-  let ref = database.ref(path[0]);
-  console.log(2);
-  res.send({ a: 3 });
+  console.log(1);
 });
 
 // URL: ../functions-api-162ea/us-central1/api_express/?token=#####
 app.get("/test1/", async (req, res) => {
-  let path = ["mappings/soccer/pinnacle"]; //to modify
-  let response = [["*", "*", "cutoffAt"]]; //to modify
-  let responseFilter = [["IDcounter"], ["*", "*", "id"]]; //to modify
+  let path = ["mappings/soccer/pinnacle/"];
+  let response = [["*", "*", "cutoffAt"]]; //no need
+  let filters = [["IDcounter"], ["*", "*", "id"]];
 
-  let ref = database.ref(path[0]);
-  let data = {};
+  try {
+    let ref = database.ref(path[0]);
+    let data = {};
 
-  await ref.once("value", (snapshot) => {
-    data = snapshot.val();
-  });
-
-  const { IDcounter, ...rest } = data;
-  data = rest;
-
-  Object.keys(data).forEach((league) => {
-    Object.keys(data[league]).forEach((game) => {
-      //delete data[league][game].id;
-      const { id, ...rest } = data[league][game];
-      data[league][game] = rest;
+    await ref.once("value", (snapshot) => {
+      data = snapshot.val();
     });
-  });
 
-  res.status(200).send(data);
+    const filter = (myData, filters) => {
+      filters.forEach((filter) => {
+        const deep = filter.length;
+        const filterOn = (level, obj) => {
+          if (level === 1) {
+            delete obj[filter[deep - level]];
+            return obj;
+          } else if (filter[deep - level] !== "*") {
+            obj[filter[deep - level]] = filterOn(
+              level - 1,
+              obj[filter[deep - level]]
+            );
+            return obj;
+          } else {
+            Object.keys(obj).forEach((childKey) => {
+              obj[childKey] = filterOn(level - 1, obj[childKey]);
+            });
+            return obj;
+          }
+        };
+        myData = filterOn(deep, myData);
+      });
+      return myData;
+    };
+    res.status(200).send(filter(data, filters));
+  } catch (error) {
+    res.status(400).send({ error: "Invalids arguments" });
+  }
 });
 
 exports.api_express = functions.https.onRequest(app);
