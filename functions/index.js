@@ -10,7 +10,55 @@ var database = admin.database();
 const app = express();
 app.use(cors({ origin: true }));
 
-// URL: ../functions-api-162ea/us-central1/api_express/?sport=soccer
+app.use((req, res, next) => {
+  const start = process.hrtime();
+  const getDurationInMilliseconds = (start) => {
+    const NS_PER_SEC = 1e9;
+    const NS_TO_MS = 1e6;
+    const diff = process.hrtime(start);
+    return (diff[0] * NS_PER_SEC + diff[1]) / NS_TO_MS;
+  };
+  const beforeResponse = () => {
+    //doStuff()
+  };
+  const afterResponse = () => {
+    res.removeListener("finish", afterResponse);
+    res.removeListener("close", afterResponse);
+    let requestDuration = getDurationInMilliseconds(start);
+    //doStuff()
+    addRequestInformations(requestDuration);
+  };
+  const addRequestInformations = async (requestDuration) => {
+    await database
+      .ref(`UsersTokens/${req.query.token}`) //try ref("UsersTokens").child(req.query.token)
+      .once("value", (snapshot) => {
+        userName = snapshot.val();
+      });
+    let userRef = database.ref(`Users/${userName}/matrics`);
+    await userRef.once("value", (snapshot) => {
+      userMatrics = snapshot.val();
+    });
+    const calculAverage = (currCountValues, currAverage, newValue) => {
+      return (currCountValues * currAverage + newValue) / (currCountValues + 1);
+    };
+    await userRef.update({
+      requestsCounter: userMatrics.requestsCounter + 1,
+      averageResponseDuration: calculAverage(
+        userMatrics.requestsCounter,
+        userMatrics.averageResponseDuration,
+        requestDuration
+      ),
+      lastRequestTime: Math.floor(new Date().getTime() / 1000), //UNIX Time Stamp
+    });
+  };
+
+  res.on("finish", afterResponse);
+  res.on("close", afterResponse);
+  beforeResponse();
+  next();
+});
+
+// URL: ../functions-api-162ea/us-central1/api_express/?sport=soccer&token=123
 app.get("/", async (req, res) => {
   const eventID = req.query.eventID;
   let sportData,
@@ -65,7 +113,6 @@ app.get("/", async (req, res) => {
 
 //  URL: ../functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]
 //token=#####
-
 app.get("/test1/", async (req, res) => {
   let path = JSON.parse(req.query.path);
   let filters = JSON.parse(req.query.filters);

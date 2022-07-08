@@ -115596,5 +115596,35 @@
       "Barcelone vs Real Madrid": { "ID": 2000 },
       "PSG vs Marseille": { "ID": 3000 }
     }
+  },
+  "UsersTokens": { "123": "user1", "456": "user2", "789": "user3" },
+  "Users": {
+    "user1": {
+      "username": "user1",
+      "token": 123,
+      "matrics": {
+        "requestsCounter": 1,
+        "averageResponseDuration": 10.123456,
+        "lastRequestTime": 123
+      }
+    },
+    "user2": {
+      "username": "user2",
+      "token": 456,
+      "matrics": {
+        "requestsCounter": 90,
+        "averageResponseDuration": 52.031123,
+        "lastRequestTime": 456
+      }
+    },
+    "user3": {
+      "username": "user3",
+      "token": 789,
+      "matrics": {
+        "requestsCounter": 134,
+        "averageResponseDuration": 45.310179,
+        "lastRequestTime": 789
+      }
+    }
   }
 }
