@@ -19,8 +19,10 @@ Add production data in the backup file at:
 Then start with importing it:
 
 ```bash
-$ kill-port --port 8000,9099,5001,8080,9000,5000,8085,9199,4000,4400,4500 && firebase emulators:start --import=./emulators.backup
+$ kill-port --port 8000,9099,5001,8080,9000,5000,8085,9199,4000,4400,4500 && firebase emulators:start --import=./emulators.backup --export-on-exit
 ```
+
+With --export-on-exit command, it will save the modifications in backup file for the next start
 
 ### Export data from emulator
 
@@ -71,12 +73,12 @@ example: https://cloud-functions.loca.lt/functions-api-162ea/us-central1/api_exp
 
 ### Get odds for a sport
 
-{base_URL}/functions-api-162ea/us-central1/api_express/?sport=soccer
+{base_URL}/functions-api-162ea/us-central1/api_express/?sport=soccer&token=123
 
 ### Get an event's odds
 
-{base_URL}/functions-api-162ea/us-central1/api_express/?sport=soccer&eventID=1000
+{base_URL}/functions-api-162ea/us-central1/api_express/?sport=soccer&eventID=1000&token=123
 
 ### Get a data with several filters
 
-{base_URL}/functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]
+{base_URL}/functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]&token=123

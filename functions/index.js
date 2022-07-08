@@ -10,6 +10,7 @@ var database = admin.database();
 const app = express();
 app.use(cors({ origin: true }));
 
+// Handlers after and before each request
 app.use((req, res, next) => {
   const start = process.hrtime();
   const getDurationInMilliseconds = (start) => {
@@ -26,30 +27,35 @@ app.use((req, res, next) => {
     res.removeListener("close", afterResponse);
     let requestDuration = getDurationInMilliseconds(start);
     //doStuff()
-    addRequestInformations(requestDuration);
-  };
-  const addRequestInformations = async (requestDuration) => {
-    await database
-      .ref(`UsersTokens/${req.query.token}`) //try ref("UsersTokens").child(req.query.token)
-      .once("value", (snapshot) => {
-        userName = snapshot.val();
+
+    const addRequestInformations = async (requestDuration) => {
+      await database
+        .ref(`UsersTokens/${req.query.token}`) //try ref("UsersTokens").child(req.query.token)
+        .once("value", (snapshot) => {
+          userName = snapshot.val();
+        });
+      let userRef = database.ref(`Users/${userName}/matrics`);
+      await userRef.once("value", (snapshot) => {
+        userMatrics = snapshot.val();
       });
-    let userRef = database.ref(`Users/${userName}/matrics`);
-    await userRef.once("value", (snapshot) => {
-      userMatrics = snapshot.val();
-    });
-    const calculAverage = (currCountValues, currAverage, newValue) => {
-      return (currCountValues * currAverage + newValue) / (currCountValues + 1);
+      const calculAverage = (currCountValues, currAverage, newValue) => {
+        return (
+          (currCountValues * currAverage + newValue) / (currCountValues + 1)
+        );
+      };
+      await userRef.update({
+        requestsCounter: userMatrics.requestsCounter + 1,
+        averageResponseDuration: calculAverage(
+          userMatrics.requestsCounter,
+          userMatrics.averageResponseDuration,
+          requestDuration
+        ),
+        lastRequestTime: Math.floor(new Date().getTime() / 1000), //UNIX Time Stamp
+      });
     };
-    await userRef.update({
-      requestsCounter: userMatrics.requestsCounter + 1,
-      averageResponseDuration: calculAverage(
-        userMatrics.requestsCounter,
-        userMatrics.averageResponseDuration,
-        requestDuration
-      ),
-      lastRequestTime: Math.floor(new Date().getTime() / 1000), //UNIX Time Stamp
-    });
+    req.query.token
+      ? addRequestInformations(requestDuration)
+      : console.log("Request Duration: ", requestDuration);
   };
 
   res.on("finish", afterResponse);
@@ -111,7 +117,7 @@ app.get("/", async (req, res) => {
   res.status(200).send(data);
 });
 
-//  URL: ../functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]
+//  URL: ../functions-api-162ea/us-central1/api_express/test1/?path=["mappings/soccer/pinnacle/"]&filters=[["IDcounter"],["*","*","id"]]&token=123
 //token=#####
 app.get("/test1/", async (req, res) => {
   let path = JSON.parse(req.query.path);
